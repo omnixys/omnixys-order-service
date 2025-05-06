@@ -1,0 +1,33 @@
+scalar DateTime
+
+enum OrderStatus {
+  PAID
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  UNPAID
+}
+
+type Order {
+  id: ID!
+  version: Int!
+  orderNumber: String!
+  status: OrderStatus!
+  username: String!
+  totalAmount: Float!
+  items: [Item!]!
+  created: DateTime!
+  updated: DateTime!
+}
+
+extend type Item @key(fields: "id") {
+  id: ID!
+  inventoryId: ID!
+  price: Float!
+  quantity: Int!
+  order: Order!
+}
+
+type CreatePayload {
+  id: ID!
+}

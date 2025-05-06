@@ -1,0 +1,58 @@
+# Hauptschema
+schema {
+  query: Query
+  mutation: Mutation
+}
+
+# Query-Typ
+type Query {
+  order(id: ID!): Order
+  orders: [Order!]!
+  item(id: ID!): Item
+  items: [Item!]!
+}
+
+type Order {
+  id: ID!
+  version: Int!
+  orderNumber: String!
+  status: OrderStatus!
+  username: String!
+  totalAmount: Float!
+  items: [Item!]!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type Item {
+  id: ID!
+  inventoryId: ID!
+  price: Float!
+  quantity: Int!
+  order: Order!
+}
+
+enum OrderStatus {
+  PAID
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  UNPAID
+}
+
+scalar DateTime
+
+type Mutation {
+  createOrder(input: CreateOrderInput!): Order!
+  updateOrder(id: ID!, version: Int!, input: UpdateOrderInput!): Order!
+}
+
+input CreateOrderInput {
+  username: String!
+  items: [CreateItemInput!]!
+}
+
+input UpdateOrderInput {
+  status: OrderStatus
+}
+

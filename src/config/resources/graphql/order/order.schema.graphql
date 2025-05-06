@@ -1,0 +1,18 @@
+# Hauptschema
+schema {
+  query: Query
+  mutation: Mutation
+}
+
+# Query-Typ
+type Query {
+  order(id: ID!): Order
+  orders: [Order!]!
+  item(id: ID!): Item
+  items: [Item!]!
+}
+
+type Mutation {
+  create(input: CreateOrderInput!, accountId: String!): CreatePayload!
+  update(id: ID!, version: Int!, input: UpdateOrderInput!): Order!
+}

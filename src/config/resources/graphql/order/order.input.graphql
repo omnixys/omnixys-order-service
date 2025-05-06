@@ -1,0 +1,14 @@
+input CreateOrderInput {
+  items: [CreateItemInput!]!
+}
+
+# Eingabetyp für neue Positionen
+input CreateItemInput {
+  inventoryId: ID!
+  price: Float!
+  quantity: Int!
+}
+
+input UpdateOrderInput {
+  status: OrderStatus
+}
