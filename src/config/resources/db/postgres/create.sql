@@ -8,7 +8,7 @@ CREATE TABLE orders
     version      INTEGER NOT NULL,
     order_number TEXT UNIQUE,
     status orderStatus NOT NULL,
-    username  text,
+    customer_id   UUID,
     total_amount DECIMAL,
     created TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     updated TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP

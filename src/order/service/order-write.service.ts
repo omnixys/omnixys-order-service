@@ -4,7 +4,7 @@ import {
     VersionInvalidException,
     VersionOutdatedException,
 } from '../errors/exceptions.js';
-import { Order } from '../model/entity/order.entity.js';
+import { Order } from '../model/entities/order.entity.js';
 import { OrderReadService } from './order-read.service.js';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UpdateParams } from '../model/interface/queryParams.interface.js';
@@ -71,11 +71,12 @@ export class OrderWriteService {
 
     }
 
-    async create({ order, token: bearerToken, accountId }: { order: Order, token: string, accountId: UUID }) {
+    async create({ order, token: bearerToken, accountId: senderAccount }: { order: Order, token: string, accountId: UUID }) {
         return await this.#tracer.startActiveSpan('order-cart.create', async (span) => {
             try {
                 return await otelContext.with(trace.setSpan(otelContext.active(), span), async () => {
                     this.#logger.debug('create: order=%o', order);
+                    const recipientAccount = '00000000-0000-0000-0000-000000000000';
 
                     const inventoryIds: UUID[] = order.items.map(item => item.inventoryId)
                     this.#logger.debug('create: inventoryIds=%o', inventoryIds)
@@ -102,7 +103,8 @@ export class OrderWriteService {
                         {
                             amount: Number(totalAmount),
                             dueDate: new Date().toISOString().slice(0, 19),
-                            username: order.username
+                            username: order.customerId,
+                            recipientAccount,
                         },
                         bearerToken,
                     );
@@ -113,9 +115,9 @@ export class OrderWriteService {
 
                     while (retries < MAX_RETRIES) {
                         order.totalAmount = totalAmount;
-                        order.orderNumber = await this.#generateOrderNumber(order.username);
+                        order.orderNumber = await this.#generateOrderNumber(order.customerId);
                         this.#logger.info(
-                            `create: Versuch #${retries + 1} – generierte Ordernummer='${order.orderNumber}' für User='${order.username}'`,
+                            `create: Versuch #${retries + 1} – generierte Ordernummer='${order.orderNumber}' für Kunde='${order.customerId}'`,
                         );
 
                         // 💳 Zahlung durchführen (externer Service)
@@ -126,7 +128,8 @@ export class OrderWriteService {
                                 method: "APPLE_PAY",
                                 invoiceId,
                                 orderNumber: order.orderNumber,
-                                accountId
+                                accountId: senderAccount,
+                                recipientAccount,
                             },
                             bearerToken
                         )
@@ -142,7 +145,7 @@ export class OrderWriteService {
                                 try {
                                     await this.#kafkaProducerService.sendMailNotification(
                                         'create',
-                                        { customerId: order.username },
+                                        { customerId: order.customerId },
                                         'order-service',
                                         trace,
                                     );
@@ -156,7 +159,7 @@ export class OrderWriteService {
                         } catch (error) {
                             if (error instanceof QueryFailedError && (error as any).code === '23505') {
                                 this.#logger.warn(
-                                    `create: Duplikat-OrderNumber '${order.orderNumber}' – neuer Versuch für User='${order.username}'`,
+                                    `create: Duplikat-OrderNumber '${order.orderNumber}' – neuer Versuch für Kunde='${order.customerId}'`,
                                 );
 
                                 retries++;

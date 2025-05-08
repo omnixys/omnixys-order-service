@@ -7,12 +7,15 @@ schema {
 # Query-Typ
 type Query {
   order(id: ID!): Order
-  orders: [Order!]!
+  orders(input: OrderSearchcriteriaInput, page: pageInput): [Order!]
   item(id: ID!): Item
   items: [Item!]!
+  customerOrders(customerId: ID!, searchcriteria: OrderSearchcriteriaInput, page: pageInput): [Order!]
 }
 
 type Mutation {
   create(input: CreateOrderInput!, accountId: String!): CreatePayload!
   update(id: ID!, version: Int!, input: UpdateOrderInput!): Order!
 }
+
+scalar DateTime

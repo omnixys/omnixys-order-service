@@ -5,8 +5,8 @@ import {
     ArrayMinSize, IsInt, Min
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { ItemDTO } from './itemDTO.entity.js';
-import { OrderStatus } from '../entity/order.entity.js';
+import { ItemDTO } from './itemDTO.input.js';
+import { OrderStatus } from '../entities/order.entity.js';
 import { UUID } from 'crypto';
 
 
@@ -29,7 +29,7 @@ export class OrderUpdateDTO {
     @Min(0)
     readonly version!: number;
 
-    readonly username!: string;
+    readonly customerId!: UUID;
 
     readonly status!: OrderStatus
 }

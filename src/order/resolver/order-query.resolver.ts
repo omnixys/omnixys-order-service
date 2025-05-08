@@ -1,5 +1,5 @@
 import { UseFilters, UseGuards, UseInterceptors } from '@nestjs/common';
-import { Args, Context, Query, Resolver } from '@nestjs/graphql';
+import { Args, Query, Resolver } from '@nestjs/graphql';
 import { Roles } from 'nest-keycloak-connect';
 import { getLogger } from '../../logger/logger.js';
 import { ResponseTimeInterceptor } from '../../logger/response-time.interceptor.js';
@@ -9,6 +9,8 @@ import { UUID } from 'crypto';
 import { KeycloakGuard } from '../../security/keycloak/guards/keycloak.guard.js';
 import { HttpExceptionFilter } from '../utils/http-exception.filter.js';
 import { createPageable, Pageable } from '../utils/pageable.js';
+import { SearchCriteriaInput } from '../model/inputs/search-criteria.input.js';
+import { PageInput } from '../model/inputs/pageable.input.js';
 
 export type IdInput = {
     readonly id: string;
@@ -30,22 +32,8 @@ export class OrderQueryResolver {
     @Roles({ roles: ['Admin'] })
     async getById(
         @Args('id') id: UUID,
-        @Context() context: any,
     ) {
         this.#logger.debug('getById: id=%d', id);
-
-        const rawAuth = context.req?.headers?.authorization;
-        const token = typeof rawAuth === 'string' && rawAuth.startsWith('Bearer ')
-            ? rawAuth.slice(7)
-            : null;
-
-        const [, payloadStr] = (token as string).split('.');
-        const payloadDecoded = atob(payloadStr);
-        const payload = JSON.parse(payloadDecoded);
-        const { exp, realm_access } = payload;
-        this.#logger.debug('#logPayload: exp=%s', exp);
-        const { roles } = realm_access;
-        this.#logger.debug('rollen: %o ', roles)
 
         const order = await this.#orderReadService.findById({ id });
 
@@ -59,6 +47,41 @@ export class OrderQueryResolver {
         this.#logger.debug('findById: order=%o', order.items);
         return order;
     }
+
+
+    @Query('orders')
+    @Roles({ roles: ['Admin'] })
+    async findOrders(
+        @Args('input', { nullable: true }) input?: SearchCriteriaInput,
+        @Args('page', { nullable: true }) page?: PageInput,
+    ) {
+        this.#logger.debug('orders: input=%o, page=%o', input, page);
+        const pageable = createPageable(page ?? {});
+        const result = await this.#orderReadService.find({
+            searchCriteria: input ?? {},
+            pageable,
+        });
+        return result.content;
+    }
+
+    @Query('customerOrders')
+    @Roles({ roles: ['Admin'] })
+    async getByCustomerID(
+        @Args('customerId') customerId: UUID,
+        @Args('searchcriteria', { nullable: true }) searchcriteria?: SearchCriteriaInput,
+        @Args('page', { nullable: true }) pageable?: PageInput,
+    ) {
+        this.#logger.debug('getByCustomerID: customerId=%s', customerId);
+        const page = createPageable(pageable ?? {});
+        const orders = await this.#orderReadService.findByCustomerId({
+            customerId,
+            pageable: page,
+            searchCriteria: searchcriteria ?? {},
+        });
+        return orders.content;
+    }
+
+
 
     @Query('orders')
     @Roles({ roles: ['Admin'] })

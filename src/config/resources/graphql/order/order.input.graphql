@@ -12,3 +12,15 @@ input CreateItemInput {
 input UpdateOrderInput {
   status: OrderStatus
 }
+
+input pageInput {
+  number: String
+  size: String
+}
+
+input OrderSearchcriteriaInput {
+  customerId: ID
+  status: OrderStatus
+  createdAfter: DateTime
+  createdBefore: DateTime
+}

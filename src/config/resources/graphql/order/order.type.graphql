@@ -13,7 +13,7 @@ type Order {
   version: Int!
   orderNumber: String!
   status: OrderStatus!
-  username: String!
+  customerId: ID!
   totalAmount: Float!
   items: [Item!]!
   created: DateTime!

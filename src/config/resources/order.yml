@@ -14,7 +14,7 @@ db:
   #host: localhost
 
   username: order_db_user
-  password: GentleCorp09.04.2025
+  password: Omnixys08.05.2025
   populate: true
 
   schema: order_schema

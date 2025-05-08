@@ -7,4 +7,5 @@ export class CreatePaymentDTO {
     invoiceId: UUID
     orderNumber: string
     accountId: UUID
+    recipientAccount: UUID
 }

@@ -1,8 +1,8 @@
-import { Item } from '../model/entity/item.entity.js';
-import { Order } from '../model/entity/order.entity.js';
+import { Item } from '../model/entities/item.entity.js';
+import { Order } from '../model/entities/order.entity.js';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Injectable } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { Repository, SelectQueryBuilder } from 'typeorm';
 import { type SearchCriteria } from '../model/types/searchCriteria.type.js';
 import { getLogger } from '../../logger/logger.js';
 import { DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE, Pageable } from '../utils/pageable.js';
@@ -39,33 +39,58 @@ export class OrderQueryBuilder {
         return queryBuilder;
     }
 
-    build({ ...props }: SearchCriteria, pageable: Pageable) {
-        this.#logger.debug(
-            'build: props=%o',
-            props,
+    build(
+        withItems: boolean = false,
+        { ...props }: SearchCriteria,
+        pageable: Pageable,
+    ): SelectQueryBuilder<Order> {
+        this.#logger.debug('build: withItems=%s', withItems);
+        this.#logger.debug('build: props=%o', props);
+        this.#logger.debug('build: pageable=%o', pageable);
+
+        let queryBuilder = this.#orderRepository.createQueryBuilder(
+            this.#orderAlias,
         );
 
-        let queryBuilder = this.#orderRepository.createQueryBuilder(this.#orderAlias);
+        if (withItems) {
+            queryBuilder.leftJoinAndSelect(
+                `${this.#orderAlias}.items`,
+                this.#itemAlias,
+            );
+        }
 
+        const { createdAfter, createdBefore, ...filterProps } = props;
         let useWhere = true;
 
-        Object.entries(props).forEach(([key, value]) => {
-            const param: Record<string, any> = {};
-            param[key] = value;
+        if (createdAfter) {
+            queryBuilder = queryBuilder.where(`${this.#orderAlias}.created >= :createdAfter`, {
+                createdAfter,
+            });
+            useWhere = false;
+        }
+
+        if (createdBefore) {
             queryBuilder = useWhere
-                ? queryBuilder.where(
-                    `${this.#orderAlias}.${key} = :${key}`,
-                    param,
-                )
-                : queryBuilder.andWhere(
-                    `${this.#orderAlias}.${key} = :${key}`,
-                    param,
-                );
+                ? queryBuilder.where(`${this.#orderAlias}.created <= :createdBefore`, {
+                    createdBefore,
+                })
+                : queryBuilder.andWhere(`${this.#orderAlias}.created <= :createdBefore`, {
+                    createdBefore,
+                });
+            useWhere = false;
+        }
+
+        Object.entries(filterProps).forEach(([key, value]) => {
+            if (value === undefined || value === null) return;
+            const param = { [key]: value };
+            queryBuilder = useWhere
+                ? queryBuilder.where(`${this.#orderAlias}.${key} = :${key}`, param)
+                : queryBuilder.andWhere(`${this.#orderAlias}.${key} = :${key}`, param);
             useWhere = false;
         });
 
-        this.#logger.debug('build: sql=%s', queryBuilder.getSql());
-        
+
+
         if (pageable?.size === 0) {
             return queryBuilder;
         }

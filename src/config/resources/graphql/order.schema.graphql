@@ -40,8 +40,6 @@ enum OrderStatus {
   UNPAID
 }
 
-scalar DateTime
-
 type Mutation {
   createOrder(input: CreateOrderInput!): Order!
   updateOrder(id: ID!, version: Int!, input: UpdateOrderInput!): Order!

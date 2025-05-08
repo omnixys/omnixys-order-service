@@ -5,7 +5,7 @@ import { request, gql } from 'graphql-request';
 @Injectable()
 export class ShoppingCartClient {
   readonly #logger = new Logger(ShoppingCartClient.name);
-  readonly #graphqlEndpoint = 'https://localhost:7101/graphql';
+  readonly #graphqlEndpoint = 'http://localhost:7101/graphql';
 
 
   async removeItemsFromCart(ids: UUID[], bearerToken: string): Promise<boolean> {

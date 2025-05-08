@@ -5,8 +5,8 @@ import { type DataSourceOptions } from 'typeorm';
 import { SnakeNamingStrategy } from './typeormNamingStrategy.js';
 import { dbType } from './db.js';
 import { config } from './order.js';
-import { entities } from '../order/model/entity/entities.js';
-import { Order } from '../order/model/entity/order.entity.js';
+import { entities } from '../order/model/entities/entities.js';
+import { Order } from '../order/model/entities/order.entity.js';
 
 const { db } = config;
 

@@ -4,7 +4,7 @@
 -- psql --dbname=bitnami_keycloak --username=bn_keycloak --file=/sql/order/create-schema-order.sql
 
 
-CREATE ROLE order_db_user LOGIN PASSWORD 'GentleCorp09.04.2025';
+CREATE ROLE order_db_user LOGIN PASSWORD 'Omnixys08.05.2025';
 
 CREATE DATABASE order_db;
 

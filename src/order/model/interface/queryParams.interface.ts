@@ -1,6 +1,6 @@
 
 import { SearchCriteria } from "../types/searchCriteria.type";
-import { Order } from "../entity/order.entity";
+import { Order } from "../entities/order.entity";
 import { Pageable } from "../../utils/pageable";
 import { UUID } from "crypto";
 

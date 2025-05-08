@@ -40,7 +40,7 @@ export class Order {
     totalAmount: Decimal;
 
     @Column()
-    readonly username: string
+    readonly customerId: UUID
 
     @OneToMany(() => Item, (item) => item.order, {
         cascade: ['insert', 'remove'],
@@ -60,6 +60,7 @@ export class Order {
             orderNumber: this.orderNumber,
             status: this.status,
             totalAmount: this.totalAmount,
+            customerId: this.customerId,
             createdAt: this.created,
             updatedAt: this.updated,
         });

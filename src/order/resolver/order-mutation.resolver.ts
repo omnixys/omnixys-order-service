@@ -1,13 +1,13 @@
 import { Args, Context, Mutation, Resolver } from '@nestjs/graphql';
 import { Roles } from 'nest-keycloak-connect';
 import { UseFilters, UseGuards, UseInterceptors } from '@nestjs/common';
-import { OrderDTO, OrderUpdateDTO } from '../model/dto/orderDTO.entity.js';
+import { OrderDTO, OrderUpdateDTO } from '../model/inputs/orderDTO.input.js';
 import { OrderWriteService } from '../service/order-write.service.js';
 import { ResponseTimeInterceptor } from '../../logger/response-time.interceptor.js';
 import { getLogger } from '../../logger/logger.js';
-import { type Item } from '../model/entity/item.entity.js';
-import { ItemDTO } from '../model/dto/itemDTO.entity.js';
-import { type Order } from '../model/entity/order.entity.js';
+import { type Item } from '../model/entities/item.entity.js';
+import { ItemDTO } from '../model/inputs/itemDTO.input.js';
+import { type Order } from '../model/entities/order.entity.js';
 import { KeycloakGuard } from '../../security/keycloak/guards/keycloak.guard.js';
 import { CreatePayload } from '../model/payloads/create.payload.js';
 import { UpdatePayload } from '../model/payloads/update.payload.js';
@@ -69,7 +69,7 @@ export class OrderMutationResolver {
         return payload;
     }
 
-    #orderDtoToOrder(orderDTO: OrderDTO, username: string): Order {
+    #orderDtoToOrder(orderDTO: OrderDTO, customerId: UUID): Order {
         const orderedItems: Item[] = orderDTO.items.map((itemDTO: ItemDTO) => {
             const item: Item = {
                 id: undefined,
@@ -87,7 +87,7 @@ export class OrderMutationResolver {
             status: 'PROCESSING',
             totalAmount: undefined,
             items: orderedItems,
-            username: username,
+            customerId: customerId,
             created: new Date(),
             updated: new Date(),
         };
@@ -103,7 +103,7 @@ export class OrderMutationResolver {
             status: orderDTO.status,
             totalAmount: undefined,
             items: undefined,
-            username: undefined,
+            customerId: undefined,
             created: undefined,
             updated: new Date(),
         };
