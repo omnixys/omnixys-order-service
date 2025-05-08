@@ -5,7 +5,7 @@ import { forwardRef, Module } from '@nestjs/common';
 import { OrderModule } from '../order/order.module.js';
 import { KafkaEventDispatcherService } from './kafka-event-dispatcher.service.js';
 import { KafkaHeaderBuilder } from './kafka-header-builder.js';
-import { ShutdownHandler } from './handlers/shutdown.handler.js';
+import { OrchestratorHandler } from './handlers/orchestrator.handler.js';
 
 @Module({
     imports: [
@@ -17,7 +17,7 @@ import { ShutdownHandler } from './handlers/shutdown.handler.js';
         KafkaConsumerService,
         KafkaEventDispatcherService,
         KafkaHeaderBuilder,
-        ShutdownHandler,
+        OrchestratorHandler,
     ],
     exports: [KafkaProducerService, KafkaConsumerService],
 })

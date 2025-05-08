@@ -1,206 +1,91 @@
-# compiled output
-/dist
-/node_modules
-/build
+# ─────────────────────────────────────────
+# 🌐 Omnixys Order Service – .gitignore
+# Optimiert für NestJS, Docker, Kafka, VSCode, OpenTelemetry
+# ─────────────────────────────────────────
 
-# Logs
-logs
-*.log
+# ─── Node.js ─────────────────────────────
+node_modules/
 npm-debug.log*
-pnpm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
 lerna-debug.log*
 
-# OS
-.DS_Store
+# ─── Build & Cache ───────────────────────
+dist/
+build/
+.cache/
+.next/
+.temp/
+.tmp/
+.rpt2_cache/
+.rts2_cache_*/
 
-# Tests
-/coverage
-/.nyc_output
+# ─── Logs ────────────────────────────────
+logs/
+*.log
+*.trace
+*.prof
+*.har
 
-# IDEs and editors
-/.idea
-.project
-.classpath
-.c9/
-*.launch
-.settings/
-*.sublime-workspace
+# ─── Coverage ────────────────────────────
+coverage/
+.nyc_output/
+.clinic/
 
-# IDE - VSCode
-.vscode/*
+# ─── Env / Secrets ───────────────────────
+.env
+.env.*
+!.env.example
+src/config/resources/tls/key.pem
+sonar-project.properties
+
+# ─── Docker ──────────────────────────────
+*.pid
+*.pid.lock
+.docker/
+docker-compose.override.yml
+
+# ─── VSCode ──────────────────────────────
+.vscode/
 !.vscode/settings.json
-!.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
 
-# dotenv environment variable files
-.env
-.env.development.local
-.env.test.local
-.env.production.local
-.env.local
-
-# temp directory
-.temp
-.tmp
-
-# Runtime data
-pids
-*.pid
-*.seed
-*.pid.lock
-
-# Diagnostic reports (https://nodejs.org/api/report.html)
-report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
-
-.gradle
-**/build/
-!src/**/build/
-
-# Ignore Gradle GUI config
-gradle-app.setting
-
-# Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
-!gradle-wrapper.jar
-
-# Avoid ignore Gradle wrappper properties
-!gradle-wrapper.properties
-
-# Cache of project
-.gradletasknamecache
-
-# Eclipse Gradle plugin generated files
-# Eclipse Core
+# ─── IDEs / Tools ────────────────────────
+.idea/
 .project
-# JDT-specific (Eclipse Java Development Tools)
 .classpath
+.settings/
+*.sublime-workspace
 
-HELP.md
-.gradle
-build/
-!gradle/wrapper/gradle-wrapper.jar
-!**/src/main/**/build/
-!**/src/test/**/build/
+# ─── Temporary / OS ──────────────────────
+.DS_Store
+Thumbs.db
+.pnpm-debug.log*
+node-ts/
+temp/
+tmp/
 
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
-bin/
-!**/src/main/**/bin/
-!**/src/test/**/bin/
+# ─── Test Snapshots ──────────────────────
+__tests__/**/__snapshots__/
 
-### IntelliJ IDEA ###
-.idea
-*.iws
-*.iml
-*.ipr
-out/
-!**/src/main/**/out/
-!**/src/test/**/out/
+# ─── Kafka / Observability ───────────────
+.otlp/
+.otel/
+otel-data/
+trace.log
 
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-
-### VS Code ###
-.vscode/
-
-# compiled output
-/dist
-/node_modules
-/build
-
-# Generierte Dateien
-build
-.extras/doc/projekthandbuch/html/*
-.extras/doc/folien/*.html
-.extras/doc/api/*
-.extras/doc/ReadMe.html
-scripts/dependency-check-report.html
-node-ts
-temp
-tmp
-dependencies.svg
-
-# Sensible Daten (Passwort, Token, private Schluessel)
-.extras/compose/db/mysql/db_root_password.txt
-.extras/compose/db/postgres/db_password.txt
-.extras/lasttest-locust/__pycache__
-.extras/lasttest-locust/.venv
-.extras/postman
+# ─── Multimedia (Dokumentation) ──────────
 .extras/*.png
 .extras/*.jpeg
 .extras/*.gif
 .extras/*.mp4
-.extras/*.mpeg
-.extras/*.mkv
-.extras/*.avi
-.extras/*.ogg
 .extras/*.webm
-src/config/resources/tls/key.pem
-sonar-project.properties
+.extras/*.svg
 
-# Logs
-logs
-*.log
-npm-debug.log*
-pnpm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-lerna-debug.log*
-
-# OS
-.DS_Store
-
-# Tests
-/coverage
-/.nyc_output
-.clinic
-__tests__/buch/__snapshots__
-
-# IDEs and editors
-/.idea
-.project
-.classpath
-.c9/
-*.launch
-.settings/
-*.sublime-workspace
-
-# IDE - VSCode
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-
-# dotenv environment variable files
-.env
-.env.development.local
-.env.test.local
-.env.production.local
-.env.local
-
-# temp directory
-.temp
-.tmp
-
-# Runtime data
-pids
-*.pid
-*.seed
-*.pid.lock
-
-# Diagnostic reports (https://nodejs.org/api/report.html)
-report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
-
+# ─── Documentation Artifacts ─────────────
+.extras/doc/**/html/
+.extras/doc/api/
+.extras/doc/ReadMe.html
+scripts/dependency-check-report.html
