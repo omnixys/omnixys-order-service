@@ -29,7 +29,7 @@ db:
 # ==============================================================================
 kafka:
   host: localhost
-  groupId: gentlecorp-order-service
+  groupId: omnixys-order-service
   
 # ==============================================================================
 # K e y c l o a k

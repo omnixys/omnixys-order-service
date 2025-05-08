@@ -51,7 +51,7 @@ export class OrderMutationResolver {
     }
 
     @Mutation()
-    @Roles({ roles: ['gentlecorp-admin', 'gentlecorp-user'] })
+    @Roles({ roles: ['Admin', 'User'] })
     async update(@Args('input') updateOrderInput: OrderUpdateDTO) {
         this.#logger.debug('update: order=%o', updateOrderInput);
 
