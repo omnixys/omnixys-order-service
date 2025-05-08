@@ -1,9 +1,9 @@
 import { getLogger } from './logger.js';
-import { KafkaProducerService } from '../kafka/kafka-producer.service.js';
 import { TraceContext } from '../trace/trace-context.util.js';
-import { KafkaTopics } from '../kafka/kafka-topic.properties.js';
 import { format } from 'util';
 import { trace, context, SpanKind, SpanStatusCode, SpanContext, Tracer } from '@opentelemetry/api';
+import { KafkaProducerService } from '../messaging/kafka-producer.service.js';
+import { KafkaTopics } from '../messaging/kafka-topic.properties.js';
 
 
 const LogLevel = {
@@ -124,7 +124,7 @@ export class LoggerPlus {
                     };
 
                     await this.#kafka.sendEvent(
-                        KafkaTopics.activity.log,
+                        KafkaTopics.logStream.log,
                         'log',
                         logPayload,
                         this.#serviceName,

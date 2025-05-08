@@ -14,13 +14,13 @@ import Decimal from 'decimal.js';
 import { InvoiceService } from '../../clients/invoice/invoice.service.js';
 import { PaymentService } from '../../clients/payment/payment.service.js';
 import { handleSpanError } from '../utils/error.util.js';
-import { KafkaConsumerService } from '../../kafka/kafka-consumer.service.js';
-import { KafkaProducerService } from '../../kafka/kafka-producer.service.js';
 import { LoggerPlus } from '../../logger/logger-plus.js';
 import { LoggerService } from '../../logger/logger.service.js';
 import { TraceContextProvider } from '../../trace/trace-context.provider.js';
 import { trace, Tracer, context as otelContext } from '@opentelemetry/api';
-import { getKafkaTopicsBy } from '../../kafka/kafka-topic.properties.js';
+import { KafkaConsumerService } from '../../messaging/kafka-consumer.service.js';
+import { KafkaProducerService } from '../../messaging/kafka-producer.service.js';
+import { getKafkaTopicsBy } from '../../messaging/kafka-topic.properties.js';
 
 @Injectable()
 export class OrderWriteService {
@@ -66,7 +66,7 @@ export class OrderWriteService {
 
     async onModuleInit(): Promise<void> {
         await this.#kafkaConsumerService.consume(
-            { topics: getKafkaTopicsBy(['Order']), },
+            { topics: getKafkaTopicsBy(['orchestrator']), },
         );
 
     }
