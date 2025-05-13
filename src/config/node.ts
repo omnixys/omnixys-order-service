@@ -1,4 +1,4 @@
-import { RESOURCES_DIR, config } from './order.js';
+import { RESOURCES_DIR, config } from './app.js';
 import { env } from './env.js';
 import { hostname } from 'node:os';
 import { httpsOptions } from './https.js';

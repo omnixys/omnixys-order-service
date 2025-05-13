@@ -11,7 +11,7 @@ export class PaymentService {
         this.#paymentClient = paymentClient
      }
 
-    async pay(input: CreatePaymentDTO, bearerToken: string): Promise<UUID> {
-        return this.#paymentClient.createPayment(input, bearerToken);
+    async pay(input: CreatePaymentDTO, receiver: UUID, bearerToken: string): Promise<UUID> {
+        return this.#paymentClient.createPayment(input, receiver, bearerToken);
     }
 }

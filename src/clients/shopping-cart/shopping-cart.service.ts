@@ -10,7 +10,7 @@ export class ShoppingCartService {
         this.#shoppingCartClient = shoppingCartClient
      }
 
-    async removeItems(itemIds: UUID[], bearerToken: string): Promise<boolean> {
-        return this.#shoppingCartClient.removeItemsFromCart(itemIds, bearerToken);
+    async removeItems(itemIds: UUID[], customerId: UUID, bearerToken: string): Promise<boolean> {
+        return this.#shoppingCartClient.removeItemsFromCart(itemIds, customerId, bearerToken);
     }
 }

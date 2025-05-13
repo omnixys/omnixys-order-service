@@ -4,13 +4,12 @@ import { resolve } from 'node:path';
 import { type DataSourceOptions } from 'typeorm';
 import { SnakeNamingStrategy } from './typeormNamingStrategy.js';
 import { dbType } from './db.js';
-import { config } from './order.js';
+import { config } from './app.js';
 import { entities } from '../order/model/entities/entities.js';
 import { Order } from '../order/model/entities/order.entity.js';
 
 const { db } = config;
 
-// nullish coalescing
 export const database =
   (db?.database as string | undefined) ?? Order.name.toLowerCase();
 
@@ -41,7 +40,6 @@ console.debug(
 );
 
 // TODO records als "deeply immutable data structure" (Stage 2)
-// https://github.com/tc39/proposal-record-tuple
 let dataSourceOptions: DataSourceOptions;
 switch (dbType) {
   case 'postgres': {

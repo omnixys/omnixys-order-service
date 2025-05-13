@@ -1,4 +1,4 @@
-import { config } from "./order";
+import { config } from "./app";
 
 const dbConfig = config.db;
 

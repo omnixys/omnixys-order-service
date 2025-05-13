@@ -1,5 +1,6 @@
 input CreateOrderInput {
   items: [CreateItemInput!]!
+  customerId: ID!
 }
 
 # Eingabetyp für neue Positionen

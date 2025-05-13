@@ -1,4 +1,4 @@
-import { config } from "./order.js";
+import { config } from "./app.js";
 
 const { kafka } = config;
 

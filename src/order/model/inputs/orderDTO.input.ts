@@ -11,7 +11,8 @@ import { UUID } from 'crypto';
 
 
 export class OrderDTO {
-    readonly username!: string;
+    
+    readonly customerId!: UUID;
 
     @IsArray()
     @ValidateNested({ each: true })

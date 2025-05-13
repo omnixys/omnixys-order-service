@@ -9,11 +9,12 @@ export class PaymentClient {
   readonly #logger = new Logger(PaymentClient.name);
   readonly #graphqlEndpoint = 'http://localhost:7201/graphql';
 
-  async createPayment(input: CreatePaymentDTO, bearerToken: string, ): Promise<UUID> {
+  async createPayment(input: CreatePaymentDTO, receiver: UUID, bearerToken: string, ): Promise<UUID> {
     const mutation = gql`
-    mutation CreatePayment($input: CreatePaymentInput!) {
+    mutation CreatePayment($input: CreatePaymentInput!, $receiver: ID!) {
       createPayment(
-        input: $input
+        input: $input,
+        receiver: $receiver
         )
     }
     `;
@@ -23,7 +24,7 @@ export class PaymentClient {
         Authorization: `Bearer ${bearerToken}`,
       };
 
-      const data: any = await request(this.#graphqlEndpoint, mutation, { input }, headers);
+      const data: any = await request(this.#graphqlEndpoint, mutation, { input, receiver }, headers);
       return data.createPayment;
     } catch (error) {
       this.#logger.error('createPayment failed', error);

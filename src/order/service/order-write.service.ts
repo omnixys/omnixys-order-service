@@ -83,7 +83,7 @@ export class OrderWriteService {
 
                     // 🟣 Fire-and-forget Call für removeItems
                     void this.#shoppingCartService
-                        .removeItems(inventoryIds, bearerToken)
+                        .removeItems(inventoryIds, order.customerId, bearerToken)
                         .then(result =>
                             this.#logger.debug('create: removeItems async finished, result=%o', result)
                         )
@@ -103,8 +103,8 @@ export class OrderWriteService {
                         {
                             amount: Number(totalAmount),
                             dueDate: new Date().toISOString().slice(0, 19),
-                            username: order.customerId,
-                            recipientAccount,
+                            issuedBy: recipientAccount,
+                            billedTo: senderAccount,
                         },
                         bearerToken,
                     );
@@ -127,10 +127,9 @@ export class OrderWriteService {
                                 currency: "EUR",
                                 method: "APPLE_PAY",
                                 invoiceId,
-                                orderNumber: order.orderNumber,
                                 accountId: senderAccount,
-                                recipientAccount,
                             },
+                            recipientAccount,
                             bearerToken
                         )
                         this.#logger.debug('create: paymentId=%s', paymentId);

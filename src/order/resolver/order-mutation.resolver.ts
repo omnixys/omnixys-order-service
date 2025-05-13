@@ -40,8 +40,8 @@ export class OrderMutationResolver {
         @Context() context: any,
     ) {
         this.#logger.debug('makeOrder: orderDTO=%o', createOrderInput);
-        const { token, username } = await this.#keycloakService.getToken(context);
-        const order: Order = this.#orderDtoToOrder(createOrderInput, username);
+        const { token } = await this.#keycloakService.getToken(context);
+        const order: Order = this.#orderDtoToOrder2(createOrderInput);
         this.#logger.debug('makeOrder: OrderInput=%o', order)
         const id = await this.#orederWriteService.create({ order, token, accountId });
         // TODO BadUserInputError
@@ -69,7 +69,33 @@ export class OrderMutationResolver {
         return payload;
     }
 
-    #orderDtoToOrder(orderDTO: OrderDTO, customerId: UUID): Order {
+    // #orderDtoToOrder(orderDTO: OrderDTO, customerId: UUID): Order {
+    //     const orderedItems: Item[] = orderDTO.items.map((itemDTO: ItemDTO) => {
+    //         const item: Item = {
+    //             id: undefined,
+    //             inventoryId: itemDTO.inventoryId,
+    //             price: itemDTO.price,
+    //             quantity: itemDTO.quantity,
+    //             order: undefined,
+    //         };
+    //         return item;
+    //     });
+    //     const order: Order = {
+    //         id: undefined,
+    //         version: undefined,
+    //         orderNumber: undefined,
+    //         status: 'PROCESSING',
+    //         totalAmount: undefined,
+    //         items: orderedItems,
+    //         customerId: customerId,
+    //         created: new Date(),
+    //         updated: new Date(),
+    //     };
+
+    //     return order;
+    // }
+
+    #orderDtoToOrder2(orderDTO: OrderDTO): Order {
         const orderedItems: Item[] = orderDTO.items.map((itemDTO: ItemDTO) => {
             const item: Item = {
                 id: undefined,
@@ -87,7 +113,7 @@ export class OrderMutationResolver {
             status: 'PROCESSING',
             totalAmount: undefined,
             items: orderedItems,
-            customerId: customerId,
+            customerId: orderDTO.customerId,
             created: new Date(),
             updated: new Date(),
         };

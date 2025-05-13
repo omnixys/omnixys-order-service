@@ -1,7 +1,7 @@
 
 import { env } from './env.js';
 import { resolve } from 'node:path';
-import { config } from './order.js';
+import { config } from './app.js';
 import pino from 'pino';
 import { PrettyOptions } from 'pino-pretty';
 
@@ -82,7 +82,6 @@ const options: pino.TransportMultiOptions | pino.TransportSingleOptions = pretty
 // type-coverage:ignore-next-line
 const transports = pino.transport(options); // eslint-disable-line @typescript-eslint/no-unsafe-assignment
 
-// https://github.com/pinojs/pino/issues/1160#issuecomment-944081187
 export const parentLogger: pino.Logger<string> = loggerDefaultValue
   ? pino(pino.destination(logFileDefault))
   : pino({ level: logLevel }, transports); // eslint-disable-line @typescript-eslint/no-unsafe-argument
