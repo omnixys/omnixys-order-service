@@ -20,8 +20,8 @@ export const KafkaTopics = {
         SendMailUpdate: 'notification.send.update.mail',
         SendMailDelete: 'notification.send.delete.mail',
     },
-    logStream: {
-        log: 'log-stream.log.order',
+    logstream: {
+        log: 'logstream.log.order',
     }
 } as const;
 
