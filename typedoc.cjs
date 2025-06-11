@@ -8,7 +8,7 @@ module.exports = {
   excludeExternals: true,
   excludePrivate: true,
   theme: 'default',
-//   favicon: 'favicon.ico',
+  //   favicon: 'favicon.ico',
   validation: {
     invalidLink: true,
   },
