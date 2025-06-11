@@ -68,8 +68,7 @@ export const keycloakConnectOptions: KeycloakConnectConfig = {
   realm,
   clientId,
   secret:
-    CLIENT_SECRET ??
-    'ERROR: Umgebungsvariable CLIENT_SECRET nicht gesetzt!',
+    CLIENT_SECRET ?? 'ERROR: Umgebungsvariable CLIENT_SECRET nicht gesetzt!',
   policyEnforcement: PolicyEnforcementMode.PERMISSIVE,
   tokenValidation,
 };
@@ -91,7 +90,5 @@ export const paths = {
 export const httpsAgent = new Agent({
   requestCert: true,
   rejectUnauthorized: false,
-  ca: httpsOptions
-    ? httpsOptions.cert as Buffer
-    : undefined,
+  ca: httpsOptions ? (httpsOptions.cert as Buffer) : undefined,
 });

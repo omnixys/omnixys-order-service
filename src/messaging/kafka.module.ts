@@ -8,17 +8,14 @@ import { KafkaHeaderBuilder } from './kafka-header-builder.js';
 import { OrchestratorHandler } from './handlers/orchestrator.handler.js';
 
 @Module({
-    imports: [
-        DiscoveryModule,
-        forwardRef(() => OrderModule),
-    ],
-    providers: [
-        KafkaProducerService,
-        KafkaConsumerService,
-        KafkaEventDispatcherService,
-        KafkaHeaderBuilder,
-        OrchestratorHandler,
-    ],
-    exports: [KafkaProducerService, KafkaConsumerService],
+  imports: [DiscoveryModule, forwardRef(() => OrderModule)],
+  providers: [
+    KafkaProducerService,
+    KafkaConsumerService,
+    KafkaEventDispatcherService,
+    KafkaHeaderBuilder,
+    OrchestratorHandler,
+  ],
+  exports: [KafkaProducerService, KafkaConsumerService],
 })
-export class KafkaModule { }
+export class KafkaModule {}

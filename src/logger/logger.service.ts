@@ -7,15 +7,15 @@ import { KafkaProducerService } from '../messaging/kafka-producer.service.js';
  */
 @Injectable()
 export class LoggerService {
-    readonly kafka: KafkaProducerService;
+  readonly kafka: KafkaProducerService;
 
-    constructor(kafka: KafkaProducerService) {
-        this.kafka = kafka;
-    }
+  constructor(kafka: KafkaProducerService) {
+    this.kafka = kafka;
+  }
 
-    getLogger(context: string): LoggerPlus {
-        return new LoggerPlus(context, this.kafka);
-    }
+  getLogger(context: string): LoggerPlus {
+    return new LoggerPlus(context, this.kafka);
+  }
 }
 
 // Verwendung in einem Service:

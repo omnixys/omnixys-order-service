@@ -1,68 +1,73 @@
 import {
-    Column,
-    CreateDateColumn,
-    Entity,
-    OneToMany,
-    PrimaryGeneratedColumn,
-    UpdateDateColumn,
-    VersionColumn,
+  Column,
+  CreateDateColumn,
+  Entity,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+  VersionColumn,
 } from 'typeorm';
 import { Item } from './item.entity.js';
 import { DecimalTransformer } from '../../utils/decimal-transformer.js';
 import { UUID } from 'crypto';
 import Decimal from 'decimal.js';
 
-export type OrderStatus = 'PAID' | 'PROCESSING' | 'SHIPPED' | 'DELIVERED' | 'UNPAID';
+export type OrderStatus =
+  | 'PAID'
+  | 'PROCESSING'
+  | 'SHIPPED'
+  | 'DELIVERED'
+  | 'UNPAID';
 
 @Entity({ name: 'orders' })
 export class Order {
-    @PrimaryGeneratedColumn('uuid')
-    id: UUID | undefined;
+  @PrimaryGeneratedColumn('uuid')
+  id: UUID | undefined;
 
-    @VersionColumn()
-    version: number;
+  @VersionColumn()
+  version: number;
 
-    @Column({ unique: true })
-    orderNumber: string;
+  @Column({ unique: true })
+  orderNumber: string;
 
-    @Column({
-        type: 'enum',
-        enum: ['PAID', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'UNPAID'],
-        default: 'PROCESSING'
-    })
-    status: OrderStatus;
+  @Column({
+    type: 'enum',
+    enum: ['PAID', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'UNPAID'],
+    default: 'PROCESSING',
+  })
+  status: OrderStatus;
 
-    @Column('decimal', {
-        precision: 8,
-        scale: 2,
-        transformer: new DecimalTransformer(),
-    })
-    totalAmount: Decimal;
+  @Column('decimal', {
+    precision: 8,
+    scale: 2,
+    transformer: new DecimalTransformer(),
+  })
+  totalAmount: Decimal;
 
-    @Column()
-    readonly customerId: UUID
+  @Column()
+  readonly customerId: UUID;
 
-    @OneToMany(() => Item, (item) => item.order, {
-        cascade: ['insert', 'remove'],
-    })
-    items: Item[];
+  @OneToMany(() => Item, (item) => item.order, {
+    cascade: ['insert', 'remove'],
+  })
+  items: Item[];
 
-    @CreateDateColumn({ type: 'timestamp' })
-    created: Date;
+  @CreateDateColumn({ type: 'timestamp' })
+  created: Date;
 
-    @UpdateDateColumn({ type: 'timestamp' })
-    updated: Date;
+  @UpdateDateColumn({ type: 'timestamp' })
+  updated: Date;
 
-    toString(): string {
-        return JSON.stringify({
-            id: this.id,
-            version: this.version,
-            orderNumber: this.orderNumber,
-            status: this.status,
-            totalAmount: this.totalAmount,
-            customerId: this.customerId,
-            createdAt: this.created,
-            updatedAt: this.updated,
-        });
-    }
+  toString(): string {
+    return JSON.stringify({
+      id: this.id,
+      version: this.version,
+      orderNumber: this.orderNumber,
+      status: this.status,
+      totalAmount: this.totalAmount,
+      customerId: this.customerId,
+      createdAt: this.created,
+      updatedAt: this.updated,
+    });
+  }
 }

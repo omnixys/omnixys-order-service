@@ -7,9 +7,10 @@ const tlsDir = resolve(env.KEYS_PATH);
 console.debug('tlsDir = %s', tlsDir);
 
 // public/private keys und Zertifikat fuer TLS
-export const httpsOptions: HttpsOptions | undefined = env.HTTPS === 'true'
-  ? {
-    key: readFileSync(resolve(tlsDir, 'key.pem')),
-    cert: readFileSync(resolve(tlsDir, 'certificate.crt')),
-  }
-  : undefined;
+export const httpsOptions: HttpsOptions | undefined =
+  env.HTTPS === 'true'
+    ? {
+        key: readFileSync(resolve(tlsDir, 'key.pem')),
+        cert: readFileSync(resolve(tlsDir, 'certificate.crt')),
+      }
+    : undefined;

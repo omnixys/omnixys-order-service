@@ -16,10 +16,12 @@ import { OrderModule } from './order/order.module.js';
 import { graphQlModuleOptions2 } from './config/graphql.js';
 import { TraceModule } from './trace/trace.module.js';
 import { KafkaModule } from './messaging/kafka.module.js';
+import { HealthModule } from './health/health.module.js';
 
 @Module({
   imports: [
     AdminModule,
+    HealthModule,
     DevModule,
     OrderModule,
     GraphQLModule.forRoot<ApolloDriverConfig>(graphQlModuleOptions2),

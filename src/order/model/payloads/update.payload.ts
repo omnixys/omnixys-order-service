@@ -1,3 +1,3 @@
 export type UpdatePayload = {
-    readonly version: number;
+  readonly version: number;
 };

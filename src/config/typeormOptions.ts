@@ -19,7 +19,7 @@ const username =
 const pass = db?.password as string | undefined;
 const passAdmin = db?.passwordAdmin as string | undefined;
 export const schema = db?.schema as string | undefined;
-const adminUsername = db?.adminUsername as string
+const adminUsername = db?.adminUsername as string;
 
 const namingStrategy = new SnakeNamingStrategy();
 

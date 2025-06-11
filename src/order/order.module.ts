@@ -11,16 +11,21 @@ import { ClientModule } from '../clients/client.module.js';
 import { KafkaModule } from '../messaging/kafka.module.js';
 
 @Module({
-    imports: [forwardRef(() => KafkaModule), KeycloakModule, TypeOrmModule.forFeature(entities), ClientModule],
-    // Provider sind z.B. Service-Klassen fuer DI
-    providers: [
-        OrderReadService,
-        OrderWriteService,
-        OrderQueryBuilder,
-        OrderQueryResolver,
-        OrderMutationResolver,
-    ],
-    // Export der Provider fuer DI in anderen Modulen
-    exports: [OrderReadService, OrderWriteService],
+  imports: [
+    forwardRef(() => KafkaModule),
+    KeycloakModule,
+    TypeOrmModule.forFeature(entities),
+    ClientModule,
+  ],
+  // Provider sind z.B. Service-Klassen fuer DI
+  providers: [
+    OrderReadService,
+    OrderWriteService,
+    OrderQueryBuilder,
+    OrderQueryResolver,
+    OrderMutationResolver,
+  ],
+  // Export der Provider fuer DI in anderen Modulen
+  exports: [OrderReadService, OrderWriteService],
 })
-export class OrderModule { }
+export class OrderModule {}

@@ -16,7 +16,7 @@ import { AuthGuard, Roles } from 'nest-keycloak-connect';
  */
 @Controller('admin')
 @UseGuards(AuthGuard)
-  @Roles({ roles: ['Admin'] })
+@Roles({ roles: ['Admin'] })
 @UseInterceptors(ResponseTimeInterceptor)
 export class DevController {
   readonly #service: DbPopulateService;

@@ -4,13 +4,21 @@ import { UUID } from 'crypto';
 
 @Injectable()
 export class ShoppingCartService {
-    readonly #shoppingCartClient: ShoppingCartClient
-    
-    constructor(shoppingCartClient: ShoppingCartClient) {
-        this.#shoppingCartClient = shoppingCartClient
-     }
+  readonly #shoppingCartClient: ShoppingCartClient;
 
-    async removeItems(itemIds: UUID[], customerId: UUID, bearerToken: string): Promise<boolean> {
-        return this.#shoppingCartClient.removeItemsFromCart(itemIds, customerId, bearerToken);
-    }
+  constructor(shoppingCartClient: ShoppingCartClient) {
+    this.#shoppingCartClient = shoppingCartClient;
+  }
+
+  async removeItems(
+    itemIds: UUID[],
+    customerId: UUID,
+    bearerToken: string,
+  ): Promise<boolean> {
+    return this.#shoppingCartClient.removeItemsFromCart(
+      itemIds,
+      customerId,
+      bearerToken,
+    );
+  }
 }

@@ -19,61 +19,64 @@ import { getLogger } from './logger.js';
  */
 @Injectable()
 export class BannerService implements OnApplicationBootstrap {
-    readonly #logger = getLogger(BannerService.name);
+  readonly #logger = getLogger(BannerService.name);
 
-    /**
-     * @description Wird beim Bootstrap der Anwendung ausgeführt, um Anwendungsinformationen und ein Banner auszugeben.
-     */
-    onApplicationBootstrap() {
-        const { host, nodeEnv, port, database:databaseName, httpsOptions } = nodeConfig;
+  /**
+   * @description Wird beim Bootstrap der Anwendung ausgeführt, um Anwendungsinformationen und ein Banner auszugeben.
+   */
+  onApplicationBootstrap() {
+    const {
+      host,
+      nodeEnv,
+      port,
+      database: databaseName,
+      httpsOptions,
+      tempo,
+    } = nodeConfig;
 
-        // Überprüfen, ob HTTPS oder HTTP verwendet wird
-        const protocol = httpsOptions === undefined ? 'http' : 'https';
+    // Überprüfen, ob HTTPS oder HTTP verwendet wird
+    const protocol = httpsOptions === undefined ? 'http' : 'https';
 
-        // Banner generieren und ausgeben
-        this.#generateBanner();
+    // Banner generieren und ausgeben
+    this.#generateBanner();
 
-        // Umgebungsinformationen mit Farben ausgeben
-        this.#logger.info(chalk.green('=== Anwendungsinformationen ==='));
-        this.#logger.info(
-            chalk.cyan('Anwendungsname: ') + chalk.yellow('Product'),
-        );
-        this.#logger.info(
-            chalk.cyan('Node.js-Version: ') + chalk.yellow(process.version),
-        );
-        this.#logger.info(chalk.cyan('Umgebung: ') + chalk.yellow(nodeEnv!));
-        this.#logger.info(
-            chalk.cyan('Protokol: ') + chalk.yellow(protocol.toString()),
-        );
-        this.#logger.info(chalk.cyan('Host: ') + chalk.yellow(host));
-        this.#logger.info(chalk.cyan('Port: ') + chalk.yellow(port.toString()));
-        this.#logger.info(
-            chalk.cyan('Datenbank: ') + chalk.yellow(databaseName),
-        );
-        this.#logger.info(
-            chalk.cyan('Betriebssystem: ') +
-            chalk.yellow(`${type()} (${release()})`),
-        );
-        this.#logger.info(
-            chalk.cyan('Benutzer: ') + chalk.yellow(userInfo().username),
-        );
-        this.#logger.info(
-            chalk.cyan('Swagger UI: ') + chalk.yellowBright('/swagger'),
-        );
-        this.#logger.info(chalk.green('===============================')); // Endmarkierung für die Anwendungsinformationen
-    }
+    // Umgebungsinformationen mit Farben ausgeben
+    this.#logger.info(chalk.green('=== Anwendungsinformationen ==='));
+    this.#logger.info(chalk.cyan('Anwendungsname: ') + chalk.yellow('Product'));
+    this.#logger.info(
+      chalk.cyan('Node.js-Version: ') + chalk.yellow(process.version),
+    );
+    this.#logger.info(chalk.cyan('Umgebung: ') + chalk.yellow(nodeEnv!));
+    this.#logger.info(
+      chalk.cyan('Protokol: ') + chalk.yellow(protocol.toString()),
+    );
+    this.#logger.info(chalk.cyan('Host: ') + chalk.yellow(host));
+    this.#logger.info(chalk.cyan('Port: ') + chalk.yellow(port.toString()));
+    this.#logger.info(chalk.cyan('Datenbank: ') + chalk.yellow(databaseName));
+    this.#logger.info(
+      chalk.cyan('Betriebssystem: ') + chalk.yellow(`${type()} (${release()})`),
+    );
+    this.#logger.info(
+      chalk.cyan('Benutzer: ') + chalk.yellow(userInfo().username),
+    );
+    this.#logger.info(
+      chalk.cyan('Swagger UI: ') + chalk.yellowBright('/swagger'),
+    );
+    this.#logger.info(chalk.cyan('Tempo URI: ') + chalk.yellow(tempo!));
+    this.#logger.info(chalk.green('===============================')); // Endmarkierung für die Anwendungsinformationen
+  }
 
-    /**
-     * @description Banner generieren und ausgeben.
-     */
-    #generateBanner() {
-        cFonts.say('order', {
-            font: 'block', // Schriftart des Banners
-            align: 'left', // Ausrichtung des Textes
-            gradient: ['white', 'black'], // Farbverlauf für das Banner
-            background: 'transparent', // Hintergrund des Banners
-            letterSpacing: 1, // Buchstabenabstand
-            lineHeight: 1, // Zeilenhöhe
-        });
-    }
+  /**
+   * @description Banner generieren und ausgeben.
+   */
+  #generateBanner() {
+    cFonts.say('order', {
+      font: 'block', // Schriftart des Banners
+      align: 'left', // Ausrichtung des Textes
+      gradient: ['white', 'black'], // Farbverlauf für das Banner
+      background: 'transparent', // Hintergrund des Banners
+      letterSpacing: 1, // Buchstabenabstand
+      lineHeight: 1, // Zeilenhöhe
+    });
+  }
 }

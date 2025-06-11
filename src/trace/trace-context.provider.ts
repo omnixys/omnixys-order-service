@@ -7,38 +7,38 @@ import { TraceContext } from './trace-context.util';
  */
 @Injectable({ scope: Scope.DEFAULT })
 export class TraceContextProvider {
-    private context?: TraceContext;
+  private context?: TraceContext;
 
-    setContext(context: TraceContext): void {
-        this.context = context;
-    }
+  setContext(context: TraceContext): void {
+    this.context = context;
+  }
 
-    getContext(): TraceContext | undefined {
-        return this.context;
-    }
+  getContext(): TraceContext | undefined {
+    return this.context;
+  }
 
-    #context: TraceContext | undefined;
+  #context: TraceContext | undefined;
 
-    clear() {
-        this.#context = undefined;
-    }
+  clear() {
+    this.#context = undefined;
+  }
 
-    has(): boolean {
-        return !!this.#context?.traceId;
-    }
+  has(): boolean {
+    return !!this.#context?.traceId;
+  }
 }
 
 @Injectable({ scope: Scope.REQUEST })
 export class TraceContextProviderHTTP {
-    private context?: TraceContext;
+  private context?: TraceContext;
 
-    setContext(context: TraceContext): void {
-        this.context = context;
-    }
+  setContext(context: TraceContext): void {
+    this.context = context;
+  }
 
-    getContext(): TraceContext | undefined {
-        return this.context;
-    }
+  getContext(): TraceContext | undefined {
+    return this.context;
+  }
 }
 
 // Verwendung z.B. im KafkaConsumer:

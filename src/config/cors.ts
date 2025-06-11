@@ -4,10 +4,8 @@ export const corsOptions: CorsOptions = {
   // Access-Control-Allow-Origin (nur Requests von origin zulassen)
   origin: [
     'https://studio.apollographql.com',
-    'http://localhost:4200',
-    'http://localhost:4000',
     'http://localhost:3000',
-    'http://localhost:3002',
+    'http://gateway:3000',
   ],
   // origin: true,
 
