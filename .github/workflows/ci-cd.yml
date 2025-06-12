@@ -229,21 +229,21 @@ jobs:
           cosign sign --yes ${{ env.IMAGE_NAME }}:${{ env.CURRENT_DATE }}
           cosign sign --yes ${{ env.IMAGE_NAME }}:latest
 
-      - name: Generate CycloneDX SBOM for Node.js
-        run: |
-          npm install -g @cyclonedx/bom
-          cyclonedx-bom -o sbom.json
+      # - name: Generate CycloneDX SBOM for Node.js
+      #   run: |
+      #     npm install -g @cyclonedx/bom
+      #     cyclonedx-bom -o sbom.json
 
-      - name: Cosign SBOM Attestation
-        run: |
-          cosign attest \
-            --predicate sbom.json \
-            --type cyclonedx \
-            --key github \
-            ${{ env.IMAGE_NAME }}:${{ env.CURRENT_DATE }}
+      # - name: Cosign SBOM Attestation
+      #   run: |
+      #     cosign attest \
+      #       --predicate sbom.json \
+      #       --type cyclonedx \
+      #       --key github \
+      #       ${{ env.IMAGE_NAME }}:${{ env.CURRENT_DATE }}
 
-      - name: Upload SBOM (CycloneDX)
-        uses: actions/upload-artifact@v4
-        with:
-          name: sbom-cyclonedx
-          path: sbom.json
+      # - name: Upload SBOM (CycloneDX)
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: sbom-cyclonedx
+      #     path: sbom.json
