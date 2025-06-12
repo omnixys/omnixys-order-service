@@ -12,10 +12,10 @@ on:
 
 permissions:
   contents: read
-  id-token: write  # ← WICHTIG für Cosign ohne Schlüssel (keyless signing)
+  id-token: write # ← WICHTIG für Cosign ohne Schlüssel (keyless signing)
 
 env:
-  COSIGN_EXPERIMENTAL: "true"
+  COSIGN_EXPERIMENTAL: 'true'
   IMAGE_NAME: ${{ secrets.DOCKER_USER }}/${{ secrets.SERVICE }}
 
   ACTIVE_PROFILE: ${{ secrets.ACTIVE_PROFILE }}
@@ -226,8 +226,8 @@ jobs:
 
       - name: Sign Docker Image with cosign (OIDC/GitHub)
         run: |
-          cosign sign ${{ env.IMAGE_NAME }}:${{ env.CURRENT_DATE }}
-          cosign sign ${{ env.IMAGE_NAME }}:latest
+          cosign sign --yes ${{ env.IMAGE_NAME }}:${{ env.CURRENT_DATE }}
+          cosign sign --yes ${{ env.IMAGE_NAME }}:latest
 
       - name: Generate CycloneDX SBOM for Node.js
         run: |

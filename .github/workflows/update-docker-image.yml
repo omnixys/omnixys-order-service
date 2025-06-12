@@ -22,12 +22,12 @@ env:
 
 jobs:
   docker:
-      name: 🐳 Docker Build & Push
-      runs-on: ubuntu-latest
-      env:
-        CURRENT_DATE: ${{ vars.CURRENT_DATE }}
-      if: github.actor == 'caleb-script' && github.event_name == 'push'
-      steps:
+    name: 🐳 Docker Build & Push
+    runs-on: ubuntu-latest
+    env:
+      CURRENT_DATE: ${{ vars.CURRENT_DATE }}
+    if: github.actor == 'caleb-script' && github.event_name == 'push'
+    steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
@@ -46,35 +46,34 @@ jobs:
           DATE=$(date +'%Y-%m-%d')
           echo "CURRENT_DATE=$DATE" >> $GITHUB_OUTPUT
 
-
       - name: Aktualisiere CURRENT_DATE in Organisations-Variable (sicher)
         run: |
-            CURRENT_DATE="${{ steps.set_date.outputs.CURRENT_DATE }}"
+          CURRENT_DATE="${{ steps.set_date.outputs.CURRENT_DATE }}"
 
-            if [ -z "$CURRENT_DATE" ]; then
-              echo "Fehler: CURRENT_DATE ist leer!"
-              exit 1
-            fi
+          if [ -z "$CURRENT_DATE" ]; then
+            echo "Fehler: CURRENT_DATE ist leer!"
+            exit 1
+          fi
 
-            ORG_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f1)
+          ORG_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f1)
 
-            EXISTING=$(curl -s \
+          EXISTING=$(curl -s \
+            -H "Authorization: Bearer ${{ secrets.PERSONAL_ACCESS_TOKEN }}" \
+            -H "Accept: application/vnd.github+json" \
+            https://api.github.com/orgs/${ORG_NAME}/actions/variables/CURRENT_DATE \
+            | jq -r '.value')
+
+          echo "Updating org-level CURRENT_DATE from $EXISTING to $CURRENT_DATE"
+
+          if [ "$EXISTING" != "$CURRENT_DATE" ]; then
+            curl -X PATCH \
               -H "Authorization: Bearer ${{ secrets.PERSONAL_ACCESS_TOKEN }}" \
               -H "Accept: application/vnd.github+json" \
               https://api.github.com/orgs/${ORG_NAME}/actions/variables/CURRENT_DATE \
-              | jq -r '.value')
-
-            echo "Updating org-level CURRENT_DATE from $EXISTING to $CURRENT_DATE"
-
-            if [ "$EXISTING" != "$CURRENT_DATE" ]; then
-              curl -X PATCH \
-                -H "Authorization: Bearer ${{ secrets.PERSONAL_ACCESS_TOKEN }}" \
-                -H "Accept: application/vnd.github+json" \
-                https://api.github.com/orgs/${ORG_NAME}/actions/variables/CURRENT_DATE \
-                -d "{\"value\": \"${CURRENT_DATE}\"}"
-            else
-              echo "CURRENT_DATE ist bereits aktuell: $CURRENT_DATE"
-            fi
+              -d "{\"value\": \"${CURRENT_DATE}\"}"
+          else
+            echo "CURRENT_DATE ist bereits aktuell: $CURRENT_DATE"
+          fi
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -113,8 +112,8 @@ jobs:
 
       - name: Sign Docker Image with cosign (OIDC/GitHub)
         run: |
-          cosign sign ${{ env.IMAGE_NAME }}:${{ env.CURRENT_DATE }}
-          cosign sign ${{ env.IMAGE_NAME }}:latest
+          cosign sign --yes ${{ env.IMAGE_NAME }}:${{ env.CURRENT_DATE }}
+          cosign sign --yes ${{ env.IMAGE_NAME }}:latest
 
       - name: Generate CycloneDX SBOM for Node.js
         run: |
@@ -128,7 +127,7 @@ jobs:
             --type cyclonedx \
             --key github \
             ${{ env.IMAGE_NAME }}:${{ env.CURRENT_DATE }}
-          
+
       - name: Upload SBOM (CycloneDX)
         uses: actions/upload-artifact@v4
         with:
