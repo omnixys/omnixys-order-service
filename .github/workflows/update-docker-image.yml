@@ -1,9 +1,14 @@
-name: Update Docker Image Tag
+name: Update Docker Image Tag - Omnixys Order Service
 
 on:
   workflow_dispatch:
 
+permissions:
+  contents: read
+  id-token: write # ← WICHTIG für Cosign ohne Schlüssel (keyless signing)
+
 env:
+  COSIGN_EXPERIMENTAL: "true"
   IMAGE_NAME: ${{ secrets.DOCKER_USER }}/${{ secrets.SERVICE }}
 
   ACTIVE_PROFILE: ${{ secrets.ACTIVE_PROFILE }}
@@ -114,22 +119,3 @@ jobs:
         run: |
           cosign sign --yes ${{ env.IMAGE_NAME }}:${{ env.CURRENT_DATE }}
           cosign sign --yes ${{ env.IMAGE_NAME }}:latest
-
-      - name: Generate CycloneDX SBOM for Node.js
-        run: |
-          npm install -g @cyclonedx/bom
-          cyclonedx-bom -o sbom.json
-
-      - name: Cosign SBOM Attestation
-        run: |
-          cosign attest \
-            --predicate sbom.json \
-            --type cyclonedx \
-            --key github \
-            ${{ env.IMAGE_NAME }}:${{ env.CURRENT_DATE }}
-
-      - name: Upload SBOM (CycloneDX)
-        uses: actions/upload-artifact@v4
-        with:
-          name: sbom-cyclonedx
-          path: sbom.json
