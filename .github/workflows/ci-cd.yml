@@ -1,21 +1,43 @@
 name: CI/CD Pipeline – Omnixys Order Service
 
 on:
-  schedule:
-    - cron: '0 3 * * *'  # täglich um 3:00 Uhr UTC
-  workflow_dispatch:
+  pull_request:
+    branches:
+      - "**"
+  push:
+    branches:
+      - main
+    tags:
+      - "v*" # Nur für Versionstags (z.B. v1.0.0)
 
 permissions:
   contents: read
-  security-events: write
+  id-token: write # ← WICHTIG für Cosign ohne Schlüssel (keyless signing)
 
 env:
+  COSIGN_EXPERIMENTAL: "true"
   IMAGE_NAME: ${{ secrets.DOCKER_USER }}/${{ secrets.SERVICE }}
 
+  ACTIVE_PROFILE: ${{ secrets.ACTIVE_PROFILE }}
+  HTTPS: ${{ secrets.HTTPS }}
+
+  NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
+  SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+  SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+  CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+  KC_SERVICE_SECRET: ${{ secrets.KC_SERVICE_SECRET }}
+
+  KAFKA_HOST: ${{ secrets.KAFKA_HOST }}
+  TEMPO_HOST: ${{ secrets.TEMPO_HOST }}
+  KEYS_PATH: ${{ secrets.KEYS_PATH }}
+
 jobs:
-  dependency-check:
-    name: "Security-Dependency-Check-${{ matrix.node-version }}-${{ vars.CURRENT_DATE }}"
+  build:
+    name: 🔨 Build
     runs-on: ubuntu-latest
+    outputs:
+      CURRENT_DATE: ${{ steps.set_date.outputs.CURRENT_DATE }}
     strategy:
       matrix:
         node-version: [23.x]
@@ -23,126 +45,186 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
+      - name: Print ref name
+        run: echo "This workflow was triggered by ${{ github.ref_name }}"
+
+      - name: Print actor
+        run: echo "The actor is ${{ github.actor }}"
+
+      - name: Print tag
+        run: echo "The tag is ${{ github.ref_name }}"
+
+      - name: Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-          cache: npm
+
+      - name: Cache Node.js modules
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-modules-
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Run OWASP Dependency Check
-        uses: dependency-check/Dependency-Check_Action@75ba02d6183445fe0761d26e836bde58b1560600
-        with:
-          project: "Omnixys-Order-Service"
-          path: './'
-          format: 'HTML'
+      - name: Build project
+        run: npm run build
 
-      - name: Upload Dependency Check report
+      - name: Compile TypeScript
+        run: npx tsc
+
+      - name: Set CURRENT_DATE
+        id: set_date
+        run: |
+          DATE=$(date +'%Y-%m-%d')
+          echo "CURRENT_DATE=$DATE" >> $GITHUB_OUTPUT
+
+      - name: Aktualisiere CURRENT_DATE in Organisations-Variable (sicher)
+        run: |
+          CURRENT_DATE="${{ steps.set_date.outputs.CURRENT_DATE }}"
+
+          if [ -z "$CURRENT_DATE" ]; then
+            echo "Fehler: CURRENT_DATE ist leer!"
+            exit 1
+          fi
+
+          ORG_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f1)
+
+          EXISTING=$(curl -s \
+            -H "Authorization: Bearer ${{ secrets.PERSONAL_ACCESS_TOKEN }}" \
+            -H "Accept: application/vnd.github+json" \
+            https://api.github.com/orgs/${ORG_NAME}/actions/variables/CURRENT_DATE \
+            | jq -r '.value')
+
+          echo "Updating org-level CURRENT_DATE from $EXISTING to $CURRENT_DATE"
+
+          if [ "$EXISTING" != "$CURRENT_DATE" ]; then
+            curl -X PATCH \
+              -H "Authorization: Bearer ${{ secrets.PERSONAL_ACCESS_TOKEN }}" \
+              -H "Accept: application/vnd.github+json" \
+              https://api.github.com/orgs/${ORG_NAME}/actions/variables/CURRENT_DATE \
+              -d "{\"value\": \"${CURRENT_DATE}\"}"
+          else
+            echo "CURRENT_DATE ist bereits aktuell: $CURRENT_DATE"
+          fi
+
+      - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: Depcheck-report
-          path: ./reports
+          name: dist-${{ matrix.node-version }}
+          path: dist
+          retention-days: 1
 
-  snyk:
-    name: "Security-Snyk-Scan-${{ matrix.node-version }}-${{ vars.CURRENT_DATE }}"
+  analyze:
     runs-on: ubuntu-latest
+    needs: build
     strategy:
       matrix:
         node-version: [23.x]
     steps:
-      - name: Checkout Repository
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
+      - name: Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-          cache: npm
 
-      - name: Install dependencies
-        run: npm ci
+      - name: Restore Node.js modules from cache
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
 
-      - name: Set up Snyk CLI
-        uses: snyk/actions/setup@cdb760004ba9ea4d525f2e043745dfe85bb9077e
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      # - name: Lint code
+      #   run: npm run eslint
 
-      - name: Authenticate with Snyk
-        run: snyk auth ${{ secrets.SNYK_TOKEN }}
+      # - name: Security audit
+      #   run: npm audit --omit=dev --audit-level=high
 
-      - name: Run Snyk Code Test (SARIF)
-        run: snyk code test --sarif > snyk-code.sarif
-        continue-on-error: true
+      - name: Generate documentation (TypeDoc)
+        run: npm run typedoc
 
-      - name: Run Snyk Dependency Test (JSON)
-        run: snyk test --severity-threshold=high --json-file-output=snyk-report.json
-        continue-on-error: true
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          publish_dir: ./docs
 
-      - name: Install snyk-to-html
-        run: npm install snyk-to-html -g
+  package:
+    name: 📦 Package Application
+    runs-on: ubuntu-latest
+    needs: [build]
+    strategy:
+      matrix:
+        node-version: [23.x]
+    if: github.actor == 'caleb-script' && github.event_name == 'push'
+    steps:
+      - name: Download dist folder
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-${{ matrix.node-version }}
+          path: dist
 
-      - name: Generate HTML Report
-        run: |
-          snyk-to-html -i snyk-report.json -o snyk-report.html
-          mkdir -p reports
-          mv snyk-report.html reports/
+      - name: Package distribution
+        run: zip -r dist.zip ./dist
 
-      - name: Upload Snyk Report
+      - name: Upload package
         uses: actions/upload-artifact@v4
         with:
-          name: Snyk-report
-          path: ./reports
+          name: dist-package-${{ matrix.node-version }}
+          path: dist.zip
 
-      - name: Run Snyk Monitor
-        if: github.event_name == 'push'
-        run: snyk monitor --all-projects
-
-      - name: Run Snyk IaC Test
-        run: snyk iac test --report
-        continue-on-error: true
-
-      - name: Run Snyk Container Monitor
-        run: snyk container monitor ${{ env.IMAGE_NAME }}:latest
-
-      - name: Upload SARIF Report to GitHub Code Scanning
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: snyk-code.sarif
-
-  docker-scout:
-    name: "Security-Docker-Scout-${{ vars.CURRENT_DATE }}"
+  docker:
+    name: 🐳 Docker Build & Push
     runs-on: ubuntu-latest
+    needs: [build, package]
+    env:
+      CURRENT_DATE: ${{ needs.build.outputs.CURRENT_DATE }}
+    if: github.actor == 'caleb-script' && github.event_name == 'push'
     steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          install: true
+          driver-opts: image=moby/buildkit:latest
+
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USER }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Docker Scout Quickview
-        id: docker-scout-quickview
-        uses: docker/scout-action@v1.18.1
+      - name: Set up Docker Cache
+        uses: actions/cache@v4
         with:
-          command: quickview
-          image: "${{ env.IMAGE_NAME }}:latest"
+          path: /tmp/.buildx-cache
+          key: buildx-${{ github.sha }}
+          restore-keys: |
+            buildx-
 
-      - name: Docker Scout CVEs
-        id: docker-scout-cves
-        uses: docker/scout-action@v1.18.1
+      - name: Build and Push Docker Image (Multi-Arch)
+        uses: docker/build-push-action@v5
         with:
-          command: cves
-          image: "${{ env.IMAGE_NAME }}:latest"
+          context: .
+          push: true
+          platforms: linux/amd64,linux/arm64
+          tags: |
+            ${{ env.IMAGE_NAME }}:${{ env.CURRENT_DATE }}
+            ${{ env.IMAGE_NAME }}:latest
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
 
-      - name: Save Docker Scout Reports
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3
+
+      - name: Sign Docker Image with cosign (OIDC/GitHub)
         run: |
-          echo "${{ steps.docker-scout-quickview.outputs.quickview }}" > docker-scout-quickview.md
-          echo "${{ steps.docker-scout-cves.outputs.cves }}" > docker-scout-cves.md
-        continue-on-error: true
-
-      - name: Upload Docker Scout Reports
-        uses: actions/upload-artifact@v4
-        with:
-          name: docker-scout-reports
-          path: ./docker-scout-*.md
+          cosign sign --yes ${{ env.IMAGE_NAME }}:${{ env.CURRENT_DATE }}
+          cosign sign --yes ${{ env.IMAGE_NAME }}:latest
