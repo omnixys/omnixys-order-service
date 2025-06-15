@@ -1,4 +1,4 @@
-name: Security – Omnixys Order Service
+name: Security - Omnixys Order Service
 
 on:
   schedule:
@@ -12,10 +12,13 @@ permissions:
 env:
   IMAGE_NAME: ${{ secrets.DOCKER_USER }}/${{ secrets.SERVICE }}
 
-jobs: 
+jobs:
   dependency-check:
-    name: "Security-Dependency-Check-${{ vars.CURRENT_DATE }}"
+    name: "Security-Dependency-Check-${{ matrix.node-version }}-${{ vars.CURRENT_DATE }}"
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [23.x]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -23,7 +26,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 23.x
+          node-version: ${{ matrix.node-version }}
           cache: npm
 
       - name: Install dependencies
@@ -43,11 +46,11 @@ jobs:
           path: ./reports
 
   snyk:
-    name: "Security-Snyk-Scan-${{ vars.CURRENT_DATE }}"
+    name: "Security-Snyk-Scan-${{ matrix.node-version }}-${{ vars.CURRENT_DATE }}"
     runs-on: ubuntu-latest
-    env:
-      CURRENT_DATE: ${{ vars.CURRENT_DATE }}
-
+    strategy:
+      matrix:
+        node-version: [23.x]
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -55,7 +58,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 23.x
+          node-version: ${{ matrix.node-version }}
           cache: npm
 
       - name: Install dependencies
@@ -100,11 +103,8 @@ jobs:
         run: snyk iac test --report
         continue-on-error: true
 
-      - name: Build Docker Image
-        run: docker build -t ${{ env.IMAGE_NAME }}:${{ env.CURRENT_DATE }} .
-
       - name: Run Snyk Container Monitor
-        run: snyk container monitor ${{ env.IMAGE_NAME }}:${{ env.CURRENT_DATE }} --file=Dockerfile
+        run: snyk container monitor ${{ env.IMAGE_NAME }}:latest
 
       - name: Upload SARIF Report to GitHub Code Scanning
         uses: github/codeql-action/upload-sarif@v3
@@ -114,9 +114,6 @@ jobs:
   docker-scout:
     name: "Security-Docker-Scout-${{ vars.CURRENT_DATE }}"
     runs-on: ubuntu-latest
-    env:
-      CURRENT_DATE: ${{ vars.CURRENT_DATE }}
-
     steps:
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
@@ -126,22 +123,23 @@ jobs:
 
       - name: Docker Scout Quickview
         id: docker-scout-quickview
-        uses: docker/scout-action@v1
+        uses: docker/scout-action@v1.18.1
         with:
           command: quickview
-          image: "${{ env.IMAGE_NAME }}:${{ env.CURRENT_DATE }}"
+          image: "${{ env.IMAGE_NAME }}:latest"
 
       - name: Docker Scout CVEs
         id: docker-scout-cves
-        uses: docker/scout-action@v1
+        uses: docker/scout-action@v1.18.1
         with:
           command: cves
-          image: "${{ env.IMAGE_NAME }}:${{ env.CURRENT_DATE }}"
+          image: "${{ env.IMAGE_NAME }}:latest"
 
       - name: Save Docker Scout Reports
         run: |
           echo "${{ steps.docker-scout-quickview.outputs.quickview }}" > docker-scout-quickview.md
           echo "${{ steps.docker-scout-cves.outputs.cves }}" > docker-scout-cves.md
+        continue-on-error: true
 
       - name: Upload Docker Scout Reports
         uses: actions/upload-artifact@v4
