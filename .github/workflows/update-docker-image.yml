@@ -9,7 +9,7 @@ permissions:
 
 env:
   COSIGN_EXPERIMENTAL: "true"
-  IMAGE_NAME: ${{ secrets.DOCKER_USER }}/${{ secrets.SERVICE }}
+  IMAGE_NAME: ${{ secrets.DOCKER_USER }}/${{ secrets.SERVICE }}-service
 
   ACTIVE_PROFILE: ${{ secrets.ACTIVE_PROFILE }}
   HTTPS: ${{ secrets.HTTPS }}
@@ -30,7 +30,7 @@ jobs:
     name: 🐳 Docker Build & Push
     strategy:
       matrix:
-        node-version: [23.x]
+        node-version: [23.10.0]
     runs-on: ubuntu-latest
     if: github.actor == 'caleb-script' && github.event_name == 'push'
     steps:
